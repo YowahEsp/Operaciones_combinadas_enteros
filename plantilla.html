@@ -708,8 +708,9 @@ h1 .apellido { color: #a3362b; }
 
   function marcarNiveles(pasoAct, iPaso) {
     // Dentro de un paréntesis se marcan dos niveles: dónde estamos y qué operación se hace
-    const nivel = pasoAct ? NIVEL_UI[pasoAct.nivel] : null;
-    const niveles = pasoAct ? (pasoAct.ambito === 'grupo' ? ['grupo', nivel] : [nivel]) : [];
+    // (un paso puede juntar «quitar paréntesis» con la operación de otro paréntesis)
+    const propios = pasoAct ? (pasoAct.niveles || [pasoAct.nivel]).map(n => NIVEL_UI[n]) : [];
+    const niveles = pasoAct ? (pasoAct.ambito === 'grupo' ? ['grupo', ...propios] : propios) : [];
     jerarquia.querySelectorAll('li').forEach(li => {
       const act = niveles.includes(li.dataset.nivel);
       li.classList.toggle('activa', act);

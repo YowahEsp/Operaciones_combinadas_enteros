@@ -62,9 +62,13 @@ igual('llaves', lineas('{12 − [3 + (−5)]²} : (−4) + √49'),
   ['{12−[3+(−5)]²}:(−4)+√49', '{12−[3−5]²}:(−4)+√49', '{12−(−2)²}:(−4)+√49', '{12−4}:(−4)+√49', '8:(−4)+√49', '8:(−4)+7', '−2+7', '5']);
 // Un corchete que se queda con un número
 igual('[−(3+4)]·2', lineas('[−(3 + 4)] · 2'), ['[−(3+4)]·2', '[−7]·2', '(−7)·2', '−14']);
-// Varios grupos: solo el nivel más alto
-igual('prioridad entre grupos', lineas('(5 − (−3)) · 2 + (4 + 2 · 3)'),
-  ['(5−(−3))·2+(4+2·3)', '(5+3)·2+(4+2·3)', '(5+3)·2+(4+6)', '8·2+10', '16+10', '26']);
+// Quitar paréntesis (signos seguidos) no hace esperar a los demás paréntesis
+igual('signos y otro paréntesis en el mismo paso', lineas('(5 − (−3)) · 2 + (4 + 2 · 3)'),
+  ['(5−(−3))·2+(4+2·3)', '(5+3)·2+(4+6)', '8·2+10', '16+10', '26']);
+igual('signos y paréntesis limpio en el mismo paso', lineas('3−[8−(−2)+7·15+(−4)]+7·(2−9)'),
+  ['3−[8−(−2)+7·15+(−4)]+7·(2−9)', '3−[8+2+7·15−4]+7·(−7)', '3−[8+2+105−4]+7·(−7)', '3−111+7·(−7)', '3−111+(−49)', '3−111−49', '−157']);
+// Entre paréntesis limpios, solo el nivel más alto (como en naturales)
+igual('prioridad entre grupos limpios', lineas('(2 + 3 · 4) − (9 − 5)'), ['(2+3·4)−(9−5)', '(2+12)−(9−5)', '14−4', '10']);
 // Signos alternativos al escribir
 igual('signos del teclado', lineas('9 - 4*(3-8)'), lineas('9 − 4 · (3 − 8)'));
 igual('potencia con ^', lineas('(-2)^3 + 1'), ['(−2)³+1', '−8+1', '−7']);

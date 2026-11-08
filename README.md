@@ -9,11 +9,13 @@ App hermana de [Operaciones combinadas](https://github.com/YowahEsp/Operaciones_
 ## Cómo trabaja
 
 1. Mientras haya paréntesis, corchetes, llaves o raíces con operaciones dentro, solo se trabaja dentro de los más internos. Lo de fuera no se toca. Un paréntesis que solo envuelve un número, como `(−8)`, no es una operación pendiente: es la forma de escribir un número con signo.
-2. Entre todos esos, se hace el nivel más alto que haya, y solo ese:
-   1. **Quitar paréntesis:** dos signos seguidos se convierten en uno, `−(−8) = +8`. Va con el 1.º de la jerarquía, como en el ejemplo resuelto del libro («Paréntesis interior: −(−8) = +8»).
-   2. Potencias y raíces.
-   3. Multiplicaciones y divisiones.
-   4. Sumas y restas.
+2. **Quitar paréntesis:** dos signos seguidos se convierten en uno, `−(−8) = +8`. Va con el 1.º de la jerarquía, como en el ejemplo resuelto del libro («Paréntesis interior: −(−8) = +8»): se hace en cuanto se llega a ese paréntesis y no hace esperar a los demás paréntesis.
+3. En los paréntesis más internos que ya no tienen signos que quitar, se hace el nivel más alto que haya entre todos ellos, y solo ese:
+   1. Potencias y raíces.
+   2. Multiplicaciones y divisiones.
+   3. Sumas y restas.
+
+   Por ejemplo, en `3 − [8 − (−2) + 7 · 15 + (−4)] + 7 · (2 − 9)` el primer paso quita `−(−2)` y `+(−4)` dentro del corchete y, a la vez, resuelve `(2 − 9)`. En cambio, en `(2 + 3 · 4) − (9 − 5)` primero se hace `3 · 4` y `(9 − 5)` espera, como en la app de naturales.
 3. Una cadena del mismo nivel se resuelve en un solo paso, de izquierda a derecha. La explicación muestra los cálculos parciales: `5 − 22 = −17; −17 + 4 = −13`.
 4. Si un paréntesis, corchete o llave queda en un solo número, desaparece en ese mismo paso. Si el número es negativo y va detrás de un signo, se escribe entre paréntesis: `4 · (3 − 8)` → `4 · (−5)`.
 5. El signo de delante de una multiplicación no se toca hasta su turno: `9 − 4 · (−5)` → `9 − (−20)` → `9 + 20`.

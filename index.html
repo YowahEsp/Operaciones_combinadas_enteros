@@ -349,12 +349,16 @@ if (typeof module !== 'undefined') module.exports = EJERCICIOS_TEMA;
       dentro, solo se trabaja dentro de los más internos. Lo de fuera no se
       toca. Un paréntesis que solo envuelve un número, como (−8), no es una
       operación pendiente: es la forma de escribir un número con signo.
-   2. Entre todos esos, se hace el nivel más alto que haya, y solo ese:
-        a) quitar paréntesis: dos signos seguidos se convierten en uno,
-           −(−8) = +8 (va con el 1.º de la jerarquía, como en el libro);
-        b) potencias y raíces;
-        c) multiplicaciones y divisiones;
-        d) sumas y restas.
+   2. Quitar paréntesis (dos signos seguidos se convierten en uno,
+      −(−8) = +8) va con el 1.º de la jerarquía, como en el libro: se hace
+      en cuanto se llega a ese paréntesis y no hace esperar a los demás.
+      En los paréntesis más internos que ya no tienen signos que quitar,
+      se hace el nivel más alto que haya entre todos ellos, y solo ese:
+        a) potencias y raíces;
+        b) multiplicaciones y divisiones;
+        c) sumas y restas.
+      Ej.: 3 − [8 − (−2) + 7 · 15] + 7 · (2 − 9): en el primer paso se
+      quita −(−2) y, a la vez, se resuelve (2 − 9).
    3. Una cadena del mismo nivel se resuelve en un solo paso, de izquierda
       a derecha.
    4. Si un paréntesis, corchete o llave queda en un solo número, desaparece
@@ -818,8 +822,23 @@ const Motor = (() => {
     const objetivos = ambito === 'grupo'
       ? todos.filter(g => grupos(g.e).length === 0).map(g => ({ e: g.e, g }))
       : [{ e: raiz, g: null }];
-    const nivel = NIVELES.find(nv => objetivos.some(o => candidatos[nv](o).length));
-    if (!nivel) throw new ErrorMates('Error interno: no hay nada que hacer en este paso.');
+    // Qué se hace en cada objetivo. Dentro de los paréntesis, quitar los signos
+    // seguidos no hace esperar a los demás; entre los paréntesis ya limpios,
+    // solo el nivel más alto. Fuera de los paréntesis, un nivel por paso.
+    let plan;
+    if (ambito === 'grupo') {
+      const conSignos = objetivos.filter(o => candidatos.signo(o).length);
+      const limpios = objetivos.filter(o => !candidatos.signo(o).length);
+      const nivelL = NIVELES.slice(1).find(nv => limpios.some(o => candidatos[nv](o).length));
+      plan = [...conSignos.map(o => ({ o, nivel: 'signo' })), ...(nivelL ? limpios.map(o => ({ o, nivel: nivelL })) : [])];
+    } else {
+      const nv = NIVELES.find(n => candidatos[n](objetivos[0]).length);
+      plan = nv ? [{ o: objetivos[0], nivel: nv }] : [];
+    }
+    if (!plan.length) throw new ErrorMates('Error interno: no hay nada que hacer en este paso.');
+    // Orden de lectura (de izquierda a derecha) para numerar los recuadros
+    const orden = new Map(grupos(raiz).map((g, i) => [g, i]));
+    plan.sort((a, b) => (a.o.g ? orden.get(a.o.g) : -1) - (b.o.g ? orden.get(b.o.g) : -1));
 
     const sust = new Map();
     const ops = [];
@@ -827,7 +846,7 @@ const Motor = (() => {
     const nuevoId = () => `${nPaso}-${k++}`;
     const num = (v, id) => ({ t: 'num', v: limpio(v), res: id, nuevo: true });
 
-    for (const o of objetivos) {
+    for (const { o, nivel } of plan) {
       const lista = candidatos[nivel](o);
       if (!lista.length) continue;
       const unico = !!o.g && o.e.terms.length === 1;   // el grupo puede desaparecer
@@ -892,7 +911,8 @@ const Motor = (() => {
     if (!ops.length) throw new ErrorMates('Error interno: no hay nada que hacer en este paso.');
     const siguiente = normalizar(copiar(raiz, sust));
     const signos = [...new Set(ops.flatMap(o => o.signos))];
-    return { ambito, nivel, ops, siguiente, signos, completo: esFinal(siguiente) };
+    const niveles = NIVELES.filter(nv => ops.some(o => o.nivel === nv));
+    return { ambito, nivel: niveles[0], niveles, ops, siguiente, signos, completo: esFinal(siguiente) };
   }
 
   /* ---------- Explicación de cada paso ---------- */
@@ -935,6 +955,11 @@ const Motor = (() => {
   const unir = (xs, conPuntoYComa) => (conPuntoYComa ? xs.join('; ') : lista(xs));
 
   function explicar(p, habiaGrupos, primerGlobal, primerPaso) {
+    if (p.niveles && p.niveles.length > 1) {
+      const resto = p.completo ? '' : ' Lo demás no se toca.';
+      return p.niveles.map(nv => explicar({ ...p, nivel: nv, niveles: [nv], completo: true,
+        ops: p.ops.filter(o => o.nivel === nv) }, habiaGrupos, primerGlobal, primerPaso)).join(' ') + resto;
+    }
     const resto = p.completo ? '' : ' Lo demás no se toca.';
     const enGrupo = p.ambito === 'grupo';
     const intro = !enGrupo && habiaGrupos && primerGlobal ? 'Ya no quedan operaciones entre paréntesis. ' : '';
@@ -1441,8 +1466,9 @@ if (typeof module !== 'undefined') module.exports = Motor;
 
   function marcarNiveles(pasoAct, iPaso) {
     // Dentro de un paréntesis se marcan dos niveles: dónde estamos y qué operación se hace
-    const nivel = pasoAct ? NIVEL_UI[pasoAct.nivel] : null;
-    const niveles = pasoAct ? (pasoAct.ambito === 'grupo' ? ['grupo', nivel] : [nivel]) : [];
+    // (un paso puede juntar «quitar paréntesis» con la operación de otro paréntesis)
+    const propios = pasoAct ? (pasoAct.niveles || [pasoAct.nivel]).map(n => NIVEL_UI[n]) : [];
+    const niveles = pasoAct ? (pasoAct.ambito === 'grupo' ? ['grupo', ...propios] : propios) : [];
     jerarquia.querySelectorAll('li').forEach(li => {
       const act = niveles.includes(li.dataset.nivel);
       li.classList.toggle('activa', act);

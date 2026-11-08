@@ -16,10 +16,10 @@ App hermana de [Operaciones combinadas](https://github.com/YowahEsp/Operaciones_
    3. Sumas y restas.
 
    Por ejemplo, en `3 − [8 − (−2) + 7 · 15 + (−4)] + 7 · (2 − 9)` el primer paso quita `−(−2)` y `+(−4)` dentro del corchete y, a la vez, resuelve `(2 − 9)`. En cambio, en `(2 + 3 · 4) − (9 − 5)` primero se hace `3 · 4` y `(9 − 5)` espera, como en la app de naturales.
-3. Una cadena del mismo nivel se resuelve en un solo paso, de izquierda a derecha. La explicación muestra los cálculos parciales: `5 − 22 = −17; −17 + 4 = −13`.
-4. Si un paréntesis, corchete o llave queda en un solo número, desaparece en ese mismo paso. Si el número es negativo y va detrás de un signo, se escribe entre paréntesis: `4 · (3 − 8)` → `4 · (−5)`.
-5. El signo de delante de una multiplicación no se toca hasta su turno: `9 − 4 · (−5)` → `9 − (−20)` → `9 + 20`.
-6. `−3²` es `−(3²) = −9`; `(−3)² = 9`. Las raíces son cuadradas y exactas; la de un número negativo no existe y la app lo explica.
+4. Una cadena del mismo nivel se resuelve en un solo paso, de izquierda a derecha. La explicación muestra los cálculos parciales: `5 − 22 = −17; −17 + 4 = −13`.
+5. Si un paréntesis, corchete o llave queda en un solo número, desaparece en ese mismo paso. Si el número es negativo y va detrás de un signo, se escribe entre paréntesis: `4 · (3 − 8)` → `4 · (−5)`.
+6. El signo de delante de una multiplicación no se toca hasta su turno: `9 − 4 · (−5)` → `9 − (−20)` → `9 + 20`.
+7. `−3²` es `−(3²) = −9`; `(−3)² = 9`. Las raíces son cuadradas y exactas; la de un número negativo no existe y la app lo explica.
 
 Cada paso tiene su color: lo que se opera se recuadra, una flecha lleva al resultado y el resultado se escribe en ese color. En la pizarra se encienden el nivel de la jerarquía y la regla de los signos que se usa en cada paso (el «Recuerda» del tema).
 

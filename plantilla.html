@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operaciones combinadas con números enteros</title>
+<meta name="description" content="Operaciones combinadas con números enteros paso a paso: negativos, llaves, potencias y raíces. En cada paso se hace lo que tiene prioridad y lo demás no se toca.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%232d3431'/%3E%3Crect x='14' y='18' width='36' height='22' rx='3' fill='none' stroke='%23f2928a' stroke-width='4'/%3E%3Cpath d='M24 29h16' stroke='%23f2928a' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M32 42v10m-5-5 5 5 5-5' fill='none' stroke='%23f2928a' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+@font-face { font-family: "Andika"; font-weight: 400; font-style: normal; font-display: swap; src: url(data:font/woff2;base64,/*FUENTE400*/) format("woff2"); }
+@font-face { font-family: "Andika"; font-weight: 700; font-style: normal; font-display: swap; src: url(data:font/woff2;base64,/*FUENTE700*/) format("woff2"); }
+
+:root {
+  --pared: #e4e2dc;
+  --pared-tinta: #27302d;
+  --pared-suave: #5c6662;
+  --marco: #c4c9cc;
+  --marco-oscuro: #8f969a;
+  --pizarra: #2d3431;
+  --tiza: #eeede6;
+  --tiza-suave: rgba(238, 237, 230, .38);
+  --error: #a3362b;
+  --t1: #f1e27c;  /* amarillo */
+  --t2: #f2928a;  /* rojo */
+  --t3: #9fcbef;  /* azul */
+  --t4: #b1df98;  /* verde */
+  --t5: #f4b979;  /* naranja */
+  --t6: #cdb2f2;  /* lila */
+  --radio: 6px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--pared);
+  color: var(--pared-tinta);
+  font-family: "Andika", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.45;
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid #2f6fb3; outline-offset: 2px; }
+
+.pagina { max-width: 1180px; margin: 0 auto; padding: 22px 16px 40px; }
+
+/* ---------- Cabecera en la pared ---------- */
+.cabecera { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 22px; margin-bottom: 14px; }
+h1 { font-size: 1.75rem; line-height: 1.15; margin: 0; letter-spacing: -.01em; }
+h1 .apellido { color: #a3362b; }
+.lema { margin: 0; color: var(--pared-suave); font-size: 1rem; max-width: 62ch; }
+
+/* ---------- Entrada ---------- */
+.entrada { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.campo {
+  width: 100%; min-width: 0;
+  font-size: 1.6rem; padding: 8px 14px;
+  background: #fbfaf7; border: 2px solid var(--marco-oscuro); border-radius: var(--radio);
+}
+.campo[aria-invalid="true"] { border-color: var(--error); }
+.boton {
+  border: 2px solid var(--pared-tinta); background: var(--pared-tinta); color: #fbfaf7;
+  border-radius: var(--radio); padding: 8px 18px; font-weight: 700; cursor: pointer;
+}
+.boton:hover { background: #3b4743; }
+.boton.claro { background: transparent; color: var(--pared-tinta); }
+.boton.claro:hover { background: rgba(39, 48, 45, .08); }
+.boton:disabled { opacity: .35; cursor: default; }
+.mensaje { min-height: 1.45em; margin: 6px 2px 0; color: var(--error); font-weight: 700; }
+
+.extras { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 4px; }
+.extras .etiqueta { color: var(--pared-suave); }
+.ejemplo {
+  background: transparent; border: 1.5px solid var(--marco-oscuro); border-radius: 999px;
+  padding: 2px 12px; cursor: pointer; font-size: .95rem;
+}
+.ejemplo:hover { border-color: var(--pared-tinta); }
+.conmutador { margin-left: auto; }
+.tema { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 8px; }
+.tema select {
+  min-width: 0; max-width: 100%; font-size: .95rem; padding: 4px 8px;
+  background: #fbfaf7; border: 1.5px solid var(--marco-oscuro); border-radius: var(--radio);
+}
+
+.teclado {
+  display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px;
+  margin-top: 10px; max-width: 640px;
+}
+.teclado[hidden] { display: none; }
+.tecla {
+  min-height: 48px; font-size: 1.35rem; font-weight: 700;
+  background: #fbfaf7; border: 1.5px solid var(--marco-oscuro); border-radius: var(--radio); cursor: pointer;
+}
+.tecla:hover { background: #fff; }
+.tecla.ancha { grid-column: span 2; font-size: 1rem; }
+.tecla svg { width: 1.4em; height: 1.4em; vertical-align: middle; }
+.tecla sup { font-size: .62em; }
+.tecla .raiz { font-size: 1em; }
+
+/* ---------- Pizarra ---------- */
+.pizarra {
+  position: relative; margin-top: 16px;
+  background:
+    radial-gradient(120% 70% at 30% 40%, rgba(255,255,255,.045), transparent 60%),
+    radial-gradient(90% 60% at 80% 75%, rgba(255,255,255,.03), transparent 65%),
+    var(--pizarra);
+  color: var(--tiza);
+  border: 12px solid var(--marco);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 2px var(--marco-oscuro), 0 2px 0 var(--marco-oscuro);
+  padding: 18px 22px 16px;
+  min-height: 300px;
+}
+.jerarquia { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 26px; font-size: 1rem; }
+.jerarquia li, .signos .r { color: var(--tiza-suave); transition: color .25s; }
+.jerarquia li.activa, .signos .r.activa { color: var(--tiza); }
+.jerarquia li.activa::after, .signos .r.activa::after {
+  content: ""; display: block; height: 3px; border-radius: 2px; margin-top: 1px; background: var(--c, var(--tiza));
+}
+
+/* Regla de los signos (el «Recuerda» del tema) */
+.signos {
+  display: flex; flex-wrap: wrap; gap: 4px 30px; margin: 4px 0 6px; padding-top: 6px;
+  border-top: 1px dashed rgba(238,237,230,.16); font-size: .92rem;
+}
+.signos .regla { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; }
+.signos .tit { color: var(--tiza-suave); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
+.signos .r { white-space: nowrap; }
+
+.desplazable { overflow-x: auto; overflow-y: hidden; padding: 14px 0 4px; }
+.lienzo { position: relative; width: max-content; min-width: 100%; font-size: var(--tam, 2.4rem); }
+.flechas { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.flecha { opacity: 0; }
+.flecha.on { opacity: 1; }
+.flecha .trazo { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.flecha .punta { stroke: none; }
+.flecha.dibujar .trazo { transition: stroke-dashoffset .45s ease-in-out; }
+.flecha.dibujar .punta { animation: aparecer .12s linear .4s both; }
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+
+.linea { display: grid; grid-template-columns: 1.1em auto; align-items: baseline; line-height: 1.25; margin-bottom: 1.35em; white-space: nowrap; }
+.linea:last-child { margin-bottom: .2em; }
+.linea.oculta { visibility: hidden; }
+.linea .igual { color: var(--tiza); }
+.n { font-variant-numeric: lining-nums; }
+.o { display: inline-block; }
+.o.suma { margin: 0 .3em 0 0; }
+.o.unario { margin: 0 .03em 0 0; }
+.sep { display: inline-block; width: .3em; }
+.o.mul { margin: 0 .14em; font-weight: 700; }
+.g { display: inline-block; margin: 0 .07em; }
+.caja {
+  display: inline-block; padding: 0 .12em; margin: 0 .05em;
+  border: .075em solid transparent; border-radius: .14em;
+  transition: border-color .2s;
+}
+.caja.alta { padding-top: .2em; }
+.caja.on { border-color: var(--c); }
+.res { color: var(--c); font-weight: 700; }
+.linea.final .res { color: var(--tiza); }
+
+/* Potencias: el exponente sube sin cambiar la altura del renglón */
+.pot { display: inline-block; }
+.exp { font-size: .6em; position: relative; top: -.92em; margin-left: .05em; font-weight: 700; }
+/* Raíz cuadrada dibujada: el signo y la raya que cubre lo de dentro */
+.raiz { display: inline-block; position: relative; padding-left: .56em; margin: 0 .02em; }
+.raiz .rad { position: absolute; left: 0; top: 0; width: .6em; height: 100%; overflow: visible; }
+.raiz .rad path { fill: none; stroke: currentColor; stroke-width: .07em; stroke-linejoin: round; stroke-linecap: round; }
+.radicando { display: inline-block; border-top: .07em solid currentColor; padding: .05em .07em 0 .05em; line-height: 1.08; }
+
+.leyenda {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin: 8px 0 4px; padding-bottom: 12px; border-bottom: 1px dashed rgba(238,237,230,.22);
+  min-height: 3.6em; font-size: 1.15rem;
+}
+.leyenda .chip { flex: none; width: 14px; height: 14px; border-radius: 50%; margin-top: .35em; background: var(--c, transparent); }
+.leyenda .num-paso { font-weight: 700; margin-right: .35em; }
+.leyenda .final-txt { font-weight: 700; font-size: 1.3rem; }
+.sup { font-size: .68em; position: relative; top: -.55em; margin-left: .03em; }
+.leyenda .raiz .rad path { stroke-width: .09em; }
+
+/* ---------- Bandeja de la pizarra ---------- */
+.bandeja { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.bandeja .progreso { color: var(--pared-suave); margin-right: auto; }
+.bandeja .boton.grande { font-size: 1.15rem; padding: 10px 26px; }
+
+.vacio { color: var(--tiza-suave); font-size: 1.25rem; padding: 40px 0; text-align: center; }
+
+.pie { margin-top: 26px; color: var(--pared-suave); font-size: .9rem; }
+.pie kbd { font-family: inherit; border: 1px solid var(--marco-oscuro); border-radius: 4px; padding: 0 5px; background: #f3f2ee; }
+
+@media (max-width: 640px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.45rem; }
+  .campo { font-size: 1.35rem; }
+  .pizarra { border-width: 8px; padding: 12px 12px 12px; }
+  .teclado { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .tecla.ancha { grid-column: span 1; }
+  .conmutador { margin-left: 0; }
+  .bandeja .progreso { width: 100%; }
+  .bandeja .boton.grande { flex: 1; }
+  .signos { font-size: .85rem; gap: 4px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flecha.dibujar .trazo, .caja, .jerarquia li, .signos .r { transition: none; }
+  .flecha.dibujar .punta { animation: none; }
+}
+@media print {
+  body { background: #fff; }
+  .entrada, .extras, .tema, .teclado, .bandeja, .mensaje, .pie { display: none !important; }
+  .pizarra { background: #fff; color: #000; border: 1px solid #999; box-shadow: none; }
+  .linea .igual, .linea.final .res { color: #000; }
+  .jerarquia li, .signos .r { color: #888; }
+  .jerarquia li.activa, .signos .r.activa { color: #000; }
+}
+</style>
+</head>
+<body>
+<main class="pagina">
+  <header class="cabecera">
+    <h1>Operaciones combinadas <span class="apellido">· números enteros</span></h1>
+    <p class="lema">En cada paso se hace la operación u operaciones que tienen prioridad, y las demás no se tocan.</p>
+  </header>
+
+  <form class="entrada" id="formulario" autocomplete="off">
+    <label for="campo" style="position:absolute;left:-9999px">Operación</label>
+    <input class="campo" id="campo" type="text" spellcheck="false" autocapitalize="off" inputmode="text"
+           placeholder="Escribe la operación, por ejemplo 5 − 2 · [3 − (−8)] + 4" aria-describedby="mensaje">
+    <button class="boton" type="submit">Resolver</button>
+  </form>
+  <p class="mensaje" id="mensaje" role="alert"></p>
+
+  <div class="extras">
+    <span class="etiqueta">Ejemplos:</span>
+    <span id="ejemplos" style="display:contents"></span>
+    <button class="boton claro conmutador" type="button" id="verTeclado" aria-expanded="false" aria-controls="teclado">Teclado en pantalla</button>
+  </div>
+  <div class="tema">
+    <label class="etiqueta" for="tema" style="color:var(--pared-suave)">Ejercicios del tema 7:</label>
+    <select id="tema"><option value="">Elige un ejercicio…</option></select>
+  </div>
+  <div class="teclado" id="teclado" hidden></div>
+
+  <section class="pizarra" aria-label="Pizarra">
+    <ol class="jerarquia" id="jerarquia">
+      <li data-nivel="grupo">1.º Paréntesis, corchetes y llaves</li>
+      <li data-nivel="pot">2.º Potencias y raíces</li>
+      <li data-nivel="mul">3.º Multiplicaciones y divisiones</li>
+      <li data-nivel="suma">4.º Sumas y restas</li>
+    </ol>
+    <div class="signos" id="signos" aria-label="Regla de los signos">
+      <div class="regla"><span class="tit">Dos signos seguidos</span>
+        <span class="r" data-k="++">+(+) = +</span><span class="r" data-k="−−">−(−) = +</span>
+        <span class="r" data-k="+−">+(−) = −</span><span class="r" data-k="−+">−(+) = −</span></div>
+      <div class="regla"><span class="tit">Multiplicar y dividir</span>
+        <span class="r" data-k="iguales">signos iguales: +</span><span class="r" data-k="distintos">signos distintos: −</span></div>
+      <div class="regla"><span class="tit">Sumar y restar</span>
+        <span class="r" data-k="mismo">mismo signo: se suman y se deja el signo</span>
+        <span class="r" data-k="distinto">distinto signo: se restan y gana el signo del mayor</span></div>
+    </div>
+    <div class="leyenda" id="leyenda" aria-live="polite"></div>
+    <div class="desplazable" id="desplazable">
+      <div class="lienzo" id="lienzo"></div>
+    </div>
+  </section>
+
+  <div class="bandeja">
+    <span class="progreso" id="progreso"></span>
+    <button class="boton claro" type="button" id="bInicio">Desde el principio</button>
+    <button class="boton claro" type="button" id="bAnterior">Anterior</button>
+    <button class="boton grande" type="button" id="bSiguiente">Siguiente</button>
+    <button class="boton claro" type="button" id="bTodo">Ver todo</button>
+  </div>
+
+  <p class="pie">Los números negativos van entre paréntesis cuando están detrás de un signo: <kbd>3 · (−2)</kbd>.
+    Para multiplicar se puede escribir <kbd>·</kbd>, <kbd>*</kbd> o <kbd>x</kbd>; para dividir, <kbd>:</kbd> o <kbd>/</kbd>.
+    Potencias: <kbd>^</kbd>, por ejemplo <kbd>(−2)^3</kbd>, o las teclas x² y x³. Raíz cuadrada: <kbd>√</kbd> o <kbd>raiz</kbd>, por ejemplo <kbd>raiz 25</kbd>.
+    Con el teclado: <kbd>→</kbd> o <kbd>Espacio</kbd> avanza y <kbd>←</kbd> retrocede.</p>
+</main>
+
+<script>
+/*EJERCICIOS*/
+</script>
+<script>
+/*MOTOR*/
+</script>
+<script>
+(() => {
+  'use strict';
+  const COLORES = ['var(--t1)', 'var(--t2)', 'var(--t3)', 'var(--t4)', 'var(--t5)', 'var(--t6)'];
+  const colorPaso = i => COLORES[i % COLORES.length];
+  const EJEMPLOS = [
+    '5 − 2 · [3 − (−8)] + 4',
+    '9 − 4 · (3 − 8)',
+    '(−2)³ + 5 · [4² − (−3)²] − 10',
+    '{12 − [3 + (−5)]²} : (−4) + √49',
+  ];
+  const NIVEL_UI = { signo: 'grupo', pot: 'pot', mul: 'mul', suma: 'suma' };
+
+  const $ = id => document.getElementById(id);
+  const campo = $('campo'), mensaje = $('mensaje'), lienzo = $('lienzo'), desplazable = $('desplazable');
+  const leyenda = $('leyenda'), progreso = $('progreso'), jerarquia = $('jerarquia'), signosEl = $('signos');
+  const bInicio = $('bInicio'), bAnterior = $('bAnterior'), bSiguiente = $('bSiguiente'), bTodo = $('bTodo');
+
+  let sol = null;      // resultado del motor
+  let fase = 0;        // 0 … 2·nPasos
+  let svg = null;
+
+  /* ---------- Normalizar signos mientras se escribe ---------- */
+  const SUPER = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  function normalizarCampo() {
+    const antes = campo.value, pos = campo.selectionStart ?? antes.length;
+    const cambiar = s => s
+      .replace(/ra[ií]z|sqrt/gi, '√')
+      .replace(/[*xX×⋅]/g, '·').replace(/[/÷]/g, ':').replace(/[-–—]/g, '−')
+      .replace(/\^\s*(\d+)/g, (_, d) => d.split('').map(c => SUPER[+c]).join(''));
+    const despues = cambiar(antes);
+    if (despues !== antes) {
+      const nuevaPos = cambiar(antes.slice(0, pos)).length;
+      campo.value = despues;
+      try { campo.setSelectionRange(nuevaPos, nuevaPos); } catch (e) {}
+    }
+  }
+  campo.addEventListener('input', () => { normalizarCampo(); campo.removeAttribute('aria-invalid'); mensaje.textContent = ''; });
+
+  /* ---------- Dibujos reutilizables ---------- */
+  const RAD = '<svg class="rad" viewBox="0 0 10 20" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M0.6 12.4 L2.7 11 L5.3 19.3 L9.3 0.55 L10.6 0.55"/></svg>';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  // Texto de las explicaciones: exponentes y raíces dibujados con la misma letra
+  function textoHTML(s) {
+    let out = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (SUPER.includes(c)) {
+        let j = i; while (j < s.length && SUPER.includes(s[j])) j++;
+        out += `<span class="sup">${s.slice(i, j).split('').map(x => SUPER.indexOf(x)).join('')}</span>`;
+        i = j - 1;
+      } else if (c === '√') {
+        let j = i + 1, dentro;
+        if (s[j] === '(') {
+          let prof = 0, k = j;
+          for (; k < s.length; k++) { if (s[k] === '(') prof++; else if (s[k] === ')' && --prof === 0) break; }
+          dentro = textoHTML(s.slice(j + 1, k)); i = k;
+        } else {
+          let k = j; while (k < s.length && /[0-9]/.test(s[k])) k++;
+          dentro = esc(s.slice(j, k)); i = k - 1;
+        }
+        out += `<span class="raiz">${RAD}<span class="radicando">${dentro}</span></span>`;
+      } else out += esc(c);
+    }
+    return out;
+  }
+
+  /* ---------- Teclado en pantalla ---------- */
+  const TECLAS = ['1','2','3','4','5','6','7','8','9','0','+','−','·',':','(',')','[',']','{','}','√','²','³','^','borrar','limpiar'];
+  const teclado = $('teclado');
+  for (const t of TECLAS) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tecla';
+    if (t === 'borrar') {
+      b.classList.add('ancha');
+      b.setAttribute('aria-label', 'Borrar');
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5m0-5l-5 5"/></svg>';
+    } else if (t === 'limpiar') {
+      b.classList.add('ancha'); b.textContent = 'Vaciar';
+    } else if (t === '√') {
+      b.setAttribute('aria-label', 'Raíz cuadrada');
+      b.innerHTML = `<span class="raiz">${RAD}<span class="radicando">&#8199;</span></span>`;
+    } else if (t === '²' || t === '³') {
+      b.setAttribute('aria-label', t === '²' ? 'Al cuadrado' : 'Al cubo');
+      b.innerHTML = `x<sup>${t === '²' ? 2 : 3}</sup>`;
+    } else if (t === '^') {
+      b.setAttribute('aria-label', 'Exponente: pulsa después el número');
+      b.innerHTML = 'x<sup>n</sup>';
+    } else b.textContent = t;
+    b.addEventListener('click', () => pulsar(t));
+    teclado.appendChild(b);
+  }
+  function pulsar(t) {
+    const ini = campo.selectionStart ?? campo.value.length, fin = campo.selectionEnd ?? ini;
+    const v = campo.value;
+    if (t === 'limpiar') { campo.value = ''; ponerCursor(0); }
+    else if (t === 'borrar') {
+      if (ini !== fin) { campo.value = v.slice(0, ini) + v.slice(fin); ponerCursor(ini); }
+      else if (ini > 0) { campo.value = v.slice(0, ini - 1) + v.slice(ini); ponerCursor(ini - 1); }
+    } else {
+      // El signo de un número va pegado a él: (−2), al principio −4
+      const previo = v.slice(0, ini).trimEnd().slice(-1);
+      const signoDeNumero = (t === '−' || t === '+') && (previo === '' || '([{'.includes(previo));
+      const junto = /[0-9]/.test(t) || '()[]{}√²³^'.includes(t) || signoDeNumero;
+      const txt = junto ? t : ' ' + t + ' ';
+      campo.value = v.slice(0, ini) + txt + v.slice(fin); ponerCursor(ini + txt.length);
+      normalizarCampo();
+    }
+    campo.removeAttribute('aria-invalid'); mensaje.textContent = '';
+  }
+  function ponerCursor(p) {
+    // En pantallas táctiles no enfocamos para que no salga el teclado del sistema
+    const tactil = matchMedia('(pointer: coarse)').matches;
+    if (!tactil) campo.focus();
+    try { campo.setSelectionRange(p, p); } catch (e) {}
+  }
+  const verTeclado = $('verTeclado');
+  function mostrarTeclado(si) {
+    teclado.hidden = !si; verTeclado.setAttribute('aria-expanded', String(si));
+    verTeclado.textContent = si ? 'Ocultar teclado' : 'Teclado en pantalla';
+  }
+  verTeclado.addEventListener('click', () => mostrarTeclado(teclado.hidden));
+  mostrarTeclado(matchMedia('(pointer: coarse)').matches);
+
+  /* ---------- Ejemplos y ejercicios del tema ---------- */
+  const zonaEj = $('ejemplos');
+  for (const op of EJEMPLOS) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ejemplo'; b.textContent = op;
+    b.addEventListener('click', () => { campo.value = op; tema.value = ''; resolver(true); });
+    zonaEj.appendChild(b);
+  }
+  const tema = $('tema');
+  for (const g of EJERCICIOS_TEMA) {
+    const og = document.createElement('optgroup'); og.label = g.grupo;
+    for (const [n, op] of g.items) {
+      const o = document.createElement('option'); o.value = op;
+      o.textContent = (/^\d+$/.test(n) ? n + ')  ' : n + ':  ') + op;
+      og.appendChild(o);
+    }
+    tema.appendChild(og);
+  }
+  tema.addEventListener('change', () => { if (tema.value) { campo.value = tema.value; resolver(true); } });
+
+  /* ---------- Dibujo de una línea ---------- */
+  const fmtN = v => (v < 0 ? '−' + (-v) : String(v));
+  const pasoDe = id => +id.split('-')[0];
+  function opHTML(o) {
+    return `<span class="o mul">${o}</span>`;
+  }
+  function caja(id, html, alta) {
+    return `<span class="caja${alta ? ' alta' : ''}" data-op="${id}" data-paso="${pasoDe(id)}" style="--c:${colorPaso(pasoDe(id))}">${html}</span>`;
+  }
+  function res(id, html) {
+    return `<span class="res" data-res="${id}" style="--c:${colorPaso(pasoDe(id))}">${html}</span>`;
+  }
+  // ¿Hay un exponente dentro? (el recuadro debe subir para abarcarlo)
+  function tienePot(n) {
+    switch (n.t) {
+      case 'pot': return true;
+      case 'grp': return tienePot(n.e);
+      case 'raiz': return tienePot(n.a);
+      case 'term': return n.fs.some(tienePot);
+      case 'expr': return n.terms.some(tienePot);
+      default: return false;
+    }
+  }
+  function numHTML(n) {
+    const t = `<span class="n">${(n.mas && n.v >= 0 ? '+' : '') + fmtN(n.v)}</span>`;
+    return n.par ? `<span class="g">(</span>${t}<span class="g">)</span>` : t;
+  }
+  function html(n) {
+    switch (n.t) {
+      case 'num':
+        // −(3 + 4) → −7: el − ya estaba escrito, así que solo el 7 va en color
+        if (n.res && n.absorbe && n.v < 0) return `<span class="n">−</span>${res(n.res, `<span class="n">${-n.v}</span>`)}`;
+        return n.res ? res(n.res, numHTML(n)) : numHTML(n);
+      case 'grp': {
+        const dentro = exprHTML(n.e);
+        const h = n.k === '√' ? dentro
+          : `<span class="g">${n.k}</span>${dentro}<span class="g">${Motor.CIERRE[n.k]}</span>`;
+        return n.caja ? caja(n.caja, h, tienePot(n)) : h;
+      }
+      case 'pot': {
+        const h = `<span class="pot">${html(n.b)}<span class="exp">${n.n}</span></span>`;
+        return n.caja ? caja(n.caja, h, true) : h;
+      }
+      case 'raiz': {
+        const h = `<span class="raiz">${RAD}<span class="radicando">${html(n.a)}</span></span>`;
+        return n.caja ? caja(n.caja, h, tienePot(n)) : h;
+      }
+    }
+  }
+  function termHTML(t, i) {
+    const signo = t.s ? `<span class="o ${i ? 'suma' : 'unario'}">${t.s}</span>` : '';
+    const sep = i ? '<span class="sep"></span>' : '';
+    // Dos signos que se han convertido en uno: signo y número, del color del paso
+    if (t.resSigno) return sep + res(t.resSigno, signo + numHTML(t.fs[0]));
+    let fac = t.fs.map((f, j) => (j ? opHTML(t.ops[j - 1]) : '') + html(f)).join('');
+    if (t.cajaF) fac = caja(t.cajaF, fac, t.fs.some(tienePot));
+    let h = signo + fac;
+    if (t.cajaT) h = caja(t.cajaT, h, false);
+    return sep + h;
+  }
+  function exprHTML(e) {
+    const h = e.terms.map(termHTML).join('');
+    return e.caja ? caja(e.caja, h, tienePot(e)) : h;
+  }
+
+  function pintar(textoVacio) {
+    lienzo.innerHTML = '';
+    if (!sol) {
+      lienzo.innerHTML = `<p class="vacio">${textoVacio || 'Escribe una operación o elige un ejemplo.'}</p>`;
+      return;
+    }
+    const partes = sol.lineas.map((l, i) =>
+      `<div class="linea${i === sol.lineas.length - 1 ? ' final' : ''}" data-i="${i}"><span class="igual">${i ? '=' : ''}</span><span class="expr">${exprHTML(l)}</span></div>`);
+    lienzo.innerHTML = partes.join('');
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'flechas'); svg.setAttribute('aria-hidden', 'true');
+    lienzo.prepend(svg);
+    ajustarTam();
+  }
+
+  /* Reduce la letra si la línea más larga no cabe */
+  function ajustarTam() {
+    if (!sol) return;
+    const base = innerWidth <= 640 ? 1.9 : 2.4;  // rem
+    lienzo.style.setProperty('--tam', base + 'rem');
+    const disp = desplazable.clientWidth - 4;
+    const ancho = Math.max(...[...lienzo.querySelectorAll('.linea')].map(l => l.scrollWidth));
+    if (ancho > disp) {
+      const f = Math.max(0.55, disp / ancho);
+      lienzo.style.setProperty('--tam', (base * f).toFixed(3) + 'rem');
+    }
+    dibujarFlechas();
+    aplicarFase(false);
+  }
+
+  /* ---------- Flechas ----------
+     Como en la pizarra: bajan del recuadro, corren en horizontal por el hueco
+     entre renglones y bajan hasta el resultado. Esquinas redondeadas, punta
+     maciza y, si en un paso hay varias, cada una por su carril sin cruzarse. */
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const medidor = document.createElement('canvas').getContext('2d');
+  // Distancia desde el borde superior de la caja de un texto hasta lo alto de sus cifras
+  function sobreCifras(el) {
+    const cs = getComputedStyle(el);
+    medidor.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const m = medidor.measureText('0123456789');
+    if (!m.fontBoundingBoxAscent) return parseFloat(cs.fontSize) * 0.25;
+    return m.fontBoundingBoxAscent - m.actualBoundingBoxAscent;
+  }
+  const f1 = n => n.toFixed(1);
+
+  function dibujarFlechas() {
+    if (!svg) return;
+    svg.innerHTML = '';
+    const r0 = lienzo.getBoundingClientRect();
+    const em = parseFloat(getComputedStyle(lienzo).fontSize);
+    const grosor = Math.max(2.4, em * 0.07);
+    const largoPunta = grosor * 4.4, anchoPunta = grosor * 3.8;
+    const radio = em * 0.2;
+
+    // 1.ª pasada (solo posiciones horizontales): flechas por paso y carriles
+    const porPaso = new Map();
+    for (const caja of lienzo.querySelectorAll('.caja')) {
+      const dest = lienzo.querySelector(`.res[data-res="${caja.dataset.op}"]`);
+      if (!dest) continue;
+      const a = caja.getBoundingClientRect(), b = dest.getBoundingClientRect();
+      const fl = {
+        caja, dest, paso: +caja.dataset.paso,
+        x1: a.left + a.width / 2 - r0.left,
+        x2: b.left + b.width / 2 - r0.left,
+      };
+      fl.dx = fl.x2 - fl.x1;
+      // Si el resultado cae debajo del recuadro, la flecha baja recta
+      const margen = Math.max(radio, em * 0.3);
+      fl.recta = fl.x2 >= a.left - r0.left + margen && fl.x2 <= a.right - r0.left - margen;
+      if (!porPaso.has(fl.paso)) porPaso.set(fl.paso, []);
+      porPaso.get(fl.paso).push(fl);
+    }
+    const lineas = lienzo.querySelectorAll('.linea');
+    lineas.forEach(l => { l.style.marginBottom = ''; });
+    for (const [paso, lista] of porPaso) {
+      // Carriles: las que van a la izquierda, de izquierda a derecha;
+      // las que van a la derecha, de derecha a izquierda. Así no se cruzan.
+      const izq = lista.filter(f => !f.recta && f.dx < 0).sort((p, q) => p.x1 - q.x1);
+      const der = lista.filter(f => !f.recta && f.dx > 0).sort((p, q) => q.x1 - p.x1);
+      const colocadas = [];
+      let carriles = 0;
+      for (const f of [...izq, ...der]) {
+        const lo = Math.min(f.x1, f.x2) - radio, hi = Math.max(f.x1, f.x2) + radio;
+        // Por debajo de todas las ya colocadas con las que se solapa: así nunca se cruzan
+        const c = colocadas.filter(o => o.lo < hi && lo < o.hi).reduce((m, o) => Math.max(m, o.carril + 1), 0);
+        f.carril = c; colocadas.push({ carril: c, lo, hi });
+        carriles = Math.max(carriles, c + 1);
+      }
+      lista.carriles = carriles;
+      // Con varios carriles, el renglón se separa un poco más para que respiren
+      if (carriles > 1 && lineas[paso])
+        lineas[paso].style.marginBottom = `${1.35 + 0.4 * (carriles - 1)}em`;
+    }
+
+    // 2.ª pasada (ya con la separación definitiva): alturas.
+    // Todas las puntas se detienen a la altura donde empezaría un recuadro,
+    // haya recuadro o no, para que queden a la misma distancia de las cifras.
+    let holgura = em * 0.06;
+    const muestra = lienzo.querySelector('.caja:not(.alta) .n');
+    if (muestra) {
+      const cajaM = muestra.closest('.caja');
+      holgura = muestra.getBoundingClientRect().top + sobreCifras(muestra) - cajaM.getBoundingClientRect().top + em * 0.05;
+    }
+    for (const lista of porPaso.values()) {
+      for (const f of lista) {
+        const a = f.caja.getBoundingClientRect(), b = f.dest.getBoundingClientRect();
+        const cifra = f.dest.querySelector('.n') || f.dest;
+        f.y1 = a.bottom - r0.top + em * 0.05;
+        f.y2 = cifra.getBoundingClientRect().top - r0.top + sobreCifras(cifra) - holgura;
+        // Si el resultado queda dentro de un recuadro de un paso posterior,
+        // la punta se detiene justo encima de su borde en vez de pisarlo
+        for (let c = f.dest.parentElement.closest('.caja'); c && lienzo.contains(c); c = c.parentElement.closest('.caja'))
+          f.y2 = Math.min(f.y2, c.getBoundingClientRect().top - r0.top - em * 0.05);
+        // …y si queda dentro de una raíz, encima de su raya
+        const rad = f.dest.closest('.radicando');
+        if (rad) f.y2 = Math.min(f.y2, rad.getBoundingClientRect().top - r0.top - em * 0.08);
+      }
+    }
+
+    for (const lista of porPaso.values()) {
+      const carriles = lista.carriles;
+      const arriba = Math.max(...lista.map(f => f.y1));
+      const abajo = Math.min(...lista.map(f => f.y2));
+      const yMin = arriba + radio + 1, yMax = abajo - largoPunta - radio - 1;
+      const yCarril = c => {
+        if (yMax <= yMin) return (arriba + abajo - largoPunta) / 2;
+        if (carriles <= 1) return yMin + (yMax - yMin) * 0.45;
+        return yMin + (yMax - yMin) * c / (carriles - 1);
+      };
+
+      for (const f of lista) {
+        const fin = f.y2 - largoPunta * 0.55;     // el trazo se mete bajo la punta
+        let d;
+        if (f.recta) {
+          d = `M${f1(f.x2)} ${f1(f.y1)} V${f1(fin)}`;
+        } else {
+          const y = yCarril(f.carril), s = Math.sign(f.dx);
+          const r = Math.max(0, Math.min(radio, Math.abs(f.dx) / 2, y - f.y1, fin - y));
+          d = `M${f1(f.x1)} ${f1(f.y1)} V${f1(y - r)}` +
+              ` Q${f1(f.x1)} ${f1(y)} ${f1(f.x1 + s * r)} ${f1(y)}` +
+              ` H${f1(f.x2 - s * r)}` +
+              ` Q${f1(f.x2)} ${f1(y)} ${f1(f.x2)} ${f1(y + r)}` +
+              ` V${f1(fin)}`;
+        }
+        const color = cssColor(f.caja);
+        const g = document.createElementNS(SVGNS, 'g');
+        g.setAttribute('class', 'flecha'); g.dataset.paso = f.paso;
+        const trazo = document.createElementNS(SVGNS, 'path');
+        trazo.setAttribute('class', 'trazo'); trazo.setAttribute('d', d);
+        trazo.setAttribute('stroke', color); trazo.style.strokeWidth = f1(grosor);
+        const xp = f.x2, yp = f.y2;
+        const punta = document.createElementNS(SVGNS, 'path');
+        punta.setAttribute('class', 'punta'); punta.setAttribute('fill', color);
+        punta.setAttribute('d', `M${f1(xp)} ${f1(yp)} L${f1(xp - anchoPunta / 2)} ${f1(yp - largoPunta)}` +
+          ` Q${f1(xp)} ${f1(yp - largoPunta * 0.72)} ${f1(xp + anchoPunta / 2)} ${f1(yp - largoPunta)} Z`);
+        g.append(trazo, punta);
+        svg.appendChild(g);
+        const L = trazo.getTotalLength();
+        trazo.style.strokeDasharray = `${L} ${L}`; trazo.style.strokeDashoffset = 0; g.dataset.l = L;
+      }
+    }
+  }
+  // Resuelve var(--tN) a un color concreto para el atributo stroke
+  function cssColor(el) {
+    const v = getComputedStyle(el).getPropertyValue('--c').trim();
+    const m = v.match(/var\((--[a-z0-9]+)\)/);
+    return m ? getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim() : v;
+  }
+
+  /* ---------- Fases ----------
+     fase impar 2i+1: se recuadra lo que tiene prioridad en el paso i
+     fase par 2i+2: flecha y resultado del paso i en la línea siguiente   */
+  function totalFases() { return sol ? sol.pasos.length * 2 : 0; }
+
+  function aplicarFase(animar) {
+    if (!sol) { actualizarControles(); marcarNiveles(null, -1); return; }
+    const visibles = 1 + Math.floor(fase / 2);
+    lienzo.querySelectorAll('.linea').forEach((l, i) => l.classList.toggle('oculta', i >= visibles));
+    const cajasHasta = Math.ceil(fase / 2);      // pasos con recuadro
+    const flechasHasta = Math.floor(fase / 2);   // pasos con flecha
+    lienzo.querySelectorAll('.caja').forEach(c => c.classList.toggle('on', +c.dataset.paso < cajasHasta));
+    const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    svg && svg.querySelectorAll('.flecha').forEach(g => {
+      const on = +g.dataset.paso < flechasHasta;
+      const nueva = on && !g.classList.contains('on');
+      const trazo = g.querySelector('.trazo');
+      g.classList.toggle('on', on);
+      if (nueva && animar && !reducir) {
+        g.classList.remove('dibujar');
+        trazo.style.strokeDashoffset = g.dataset.l;
+        g.getBoundingClientRect();
+        g.classList.add('dibujar');
+        trazo.style.strokeDashoffset = 0;
+      } else if (!nueva) { g.classList.remove('dibujar'); trazo.style.strokeDashoffset = 0; }
+    });
+
+    // Jerarquía, regla de los signos y leyenda
+    const iPaso = fase === 0 ? -1 : Math.ceil(fase / 2) - 1;
+    const pasoAct = iPaso >= 0 && fase < totalFases() ? sol.pasos[iPaso] : null;
+    marcarNiveles(pasoAct, iPaso);
+
+    if (fase === 0) {
+      leyenda.innerHTML = `<span class="chip"></span><span>Pulsa <b>Siguiente</b> para marcar lo que tiene prioridad.</span>`;
+    } else if (fase === totalFases()) {
+      leyenda.innerHTML = `<span class="chip" style="--c:var(--tiza)"></span><span class="final-txt">Resultado: ${fmtN(sol.resultado)}</span>`;
+    } else {
+      const p = sol.pasos[iPaso];
+      const extra = fase % 2 === 1 ? '' : ' <span style="opacity:.75">Se escribe el resultado y se copia lo demás.</span>';
+      leyenda.innerHTML = `<span class="chip" style="--c:${colorPaso(iPaso)}"></span><span><span class="num-paso">Paso ${iPaso + 1}.</span>${textoHTML(p.texto)}${extra}</span>`;
+    }
+    actualizarControles();
+  }
+
+  function marcarNiveles(pasoAct, iPaso) {
+    // Dentro de un paréntesis se marcan dos niveles: dónde estamos y qué operación se hace
+    const nivel = pasoAct ? NIVEL_UI[pasoAct.nivel] : null;
+    const niveles = pasoAct ? (pasoAct.ambito === 'grupo' ? ['grupo', nivel] : [nivel]) : [];
+    jerarquia.querySelectorAll('li').forEach(li => {
+      const act = niveles.includes(li.dataset.nivel);
+      li.classList.toggle('activa', act);
+      li.style.setProperty('--c', act ? colorPaso(iPaso) : '');
+    });
+    const usados = pasoAct ? pasoAct.signos : [];
+    signosEl.querySelectorAll('.r').forEach(r => {
+      const act = usados.includes(r.dataset.k);
+      r.classList.toggle('activa', act);
+      r.style.setProperty('--c', act ? colorPaso(iPaso) : '');
+    });
+  }
+
+  function actualizarControles() {
+    const t = totalFases();
+    bAnterior.disabled = !sol || fase === 0;
+    bInicio.disabled = !sol || fase === 0;
+    bSiguiente.disabled = !sol || fase >= t;
+    bTodo.disabled = !sol || fase >= t;
+    if (!sol) { progreso.textContent = ''; return; }
+    const n = sol.pasos.length;
+    progreso.textContent = fase === t ? `${n} ${n === 1 ? 'paso' : 'pasos'}: terminado`
+                         : fase === 0 ? `${n} ${n === 1 ? 'paso' : 'pasos'}`
+                         : `Paso ${Math.ceil(fase / 2)} de ${n}`;
+  }
+
+  function ir(f, animar) { fase = Math.max(0, Math.min(totalFases(), f)); aplicarFase(animar); }
+  bSiguiente.addEventListener('click', () => ir(fase + 1, true));
+  bAnterior.addEventListener('click', () => ir(fase - 1, false));
+  bInicio.addEventListener('click', () => ir(0, false));
+  bTodo.addEventListener('click', () => ir(totalFases(), false));
+
+  document.addEventListener('keydown', e => {
+    if (!sol || e.target === campo || e.target === tema || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest && e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); ir(fase + 1, true); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); ir(fase - 1, false); }
+    else if (e.key === 'Home') { e.preventDefault(); ir(0, false); }
+    else if (e.key === 'End') { e.preventDefault(); ir(totalFases(), false); }
+  });
+
+  /* ---------- Resolver ---------- */
+  function resolver(desdeEjemplo) {
+    normalizarCampo();
+    const src = campo.value;
+    try {
+      sol = Motor.resolver(src);
+      mensaje.textContent = '';
+      campo.removeAttribute('aria-invalid');
+      fase = 0;
+      pintar();
+      try {   // la dirección guarda la operación para compartirla (si el navegador lo permite)
+        const url = new URL(location.href);
+        url.searchParams.set('op', src.trim());
+        history.replaceState(null, '', url);
+      } catch (_) {}
+      if (desdeEjemplo !== 'url') bSiguiente.focus({ preventScroll: true });
+    } catch (e) {
+      if (!(e instanceof Motor.ErrorMates)) { console.error(e); mensaje.textContent = 'Algo ha fallado al resolver esta operación.'; return; }
+      sol = null; pintar('Corrige la operación y pulsa «Resolver».'); aplicarFase(false);
+      mensaje.textContent = e.message;
+      campo.setAttribute('aria-invalid', 'true');
+      if (typeof e.pos === 'number') { campo.focus(); try { campo.setSelectionRange(e.pos, e.pos + 1); } catch (_) {} }
+      leyenda.innerHTML = '';
+    }
+  }
+  $('formulario').addEventListener('submit', e => { e.preventDefault(); tema.value = ''; resolver(false); });
+
+  let tResize;
+  addEventListener('resize', () => { clearTimeout(tResize); tResize = setTimeout(ajustarTam, 120); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => sol && ajustarTam());
+
+  // Inicio: operación de la URL o el primer ejemplo
+  let inicial = null;
+  try { inicial = new URL(location.href).searchParams.get('op'); } catch (_) {}
+  campo.value = inicial || EJEMPLOS[0];
+  resolver('url');
+})();
+</script>
+</body>
+</html>
